@@ -5,6 +5,7 @@ go 1.22.2
 require (
 	github.com/a-h/templ v0.2.680
 	github.com/charmbracelet/log v0.4.0
+	github.com/go-playground/form/v4 v4.2.1
 	github.com/go-playground/validator/v10 v10.20.0
 	github.com/joho/godotenv v1.5.1
 	go.uber.org/fx v1.21.1

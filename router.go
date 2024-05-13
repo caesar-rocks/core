@@ -71,8 +71,8 @@ func (r *Router) Delete(pattern string, handler Handler) *Route {
 }
 
 // Render adds a route (with a GET method) that renders a component.
-func (r *Router) Render(pattern string, component templ.Component) {
-	r.Get(pattern, func(ctx *CaesarCtx) error {
+func (r *Router) Render(pattern string, component templ.Component) *Route {
+	return r.Get(pattern, func(ctx *CaesarCtx) error {
 		return ctx.Render(component)
 	})
 }

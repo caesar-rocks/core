@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/charmbracelet/log"
@@ -42,15 +41,15 @@ func buildHTTPHandler(router *Router, route *Route, errorHandler *ErrorHandler) 
 		var err error
 		timeStart := time.Now()
 
+		ctx := &CaesarCtx{ResponseWriter: w, Request: r, statusCode: http.StatusOK}
+
 		// Run the global middleware
 		for _, middleware := range router.Middleware {
-			err := middleware(&CaesarCtx{ResponseWriter: w, Request: r, statusCode: http.StatusOK})
+			err := middleware(ctx)
 			if err != nil {
 				break
 			}
 		}
-
-		ctx := &CaesarCtx{ResponseWriter: w, Request: r, statusCode: http.StatusOK}
 
 		// Run the route-related middleware, if no error occurred before
 		if err == nil {
@@ -98,15 +97,16 @@ func NewHTTPMux(router *Router, errorHandler *ErrorHandler) *http.ServeMux {
 
 		handler = buildHTTPHandler(router, route, errorHandler)
 
-		if !strings.HasSuffix(route.Pattern, "/") {
-			route.Pattern += "/"
-		}
-		route.Pattern += "{$}"
-
 		if route.Method == "" {
 			router.Mux.HandleFunc(route.Pattern, handler)
+			if route.Pattern != "/" {
+				router.Mux.HandleFunc(route.Pattern+"/", handler)
+			}
 		} else {
 			router.Mux.HandleFunc(route.Method+" "+route.Pattern, handler)
+			if route.Pattern != "/" {
+				router.Mux.HandleFunc(route.Method+" "+route.Pattern+"/", handler)
+			}
 		}
 	}
 
@@ -160,6 +160,5 @@ func (app *App) Run() {
 		fx.Provide(app.Providers...),
 		fx.Invoke(func(*http.Server) {}),
 		fx.Invoke(app.Invokers...),
-		fx.NopLogger,
 	).Run()
 }

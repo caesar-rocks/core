@@ -3,9 +3,12 @@ package core
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/a-h/templ"
+	"github.com/go-playground/form/v4"
+	"github.com/go-playground/validator/v10"
 )
 
 // CaesarCtx is a wrapper around http.ResponseWriter and *http.Request,
@@ -53,4 +56,59 @@ func (c *CaesarCtx) Context() context.Context {
 func (c *CaesarCtx) WithStatus(statusCode int) *CaesarCtx {
 	c.statusCode = statusCode
 	return c
+}
+
+// PathValue returns the value of a path parameter.
+func (c *CaesarCtx) PathValue(key string) string {
+	return c.Request.PathValue(key)
+}
+
+// DecodeJSON decodes the JSON body of the request into the provided value.
+func (c *CaesarCtx) DecodeJSON(v any) error {
+	return json.NewDecoder(c.Request.Body).Decode(v)
+}
+
+// Redirect redirects the client to the provided URL.
+func (ctx *CaesarCtx) Redirect(to string) error {
+	if ctx.GetHeader("HX-Request") == "true" {
+		ctx.WithStatus(http.StatusSeeOther).SetHeader("HX-Redirect", to)
+		return nil
+	}
+	http.Redirect(ctx.ResponseWriter, ctx.Request, to, http.StatusSeeOther)
+	return nil
+}
+
+// Validate validates the request body or form values.
+// It returns the data, the validation errors, and a boolean indicating if the data is valid.
+func Validate[T interface{}](ctx *CaesarCtx) (data *T, validationErrors *validator.ValidationErrors, ok bool) {
+	data = new(T)
+	var errs validator.ValidationErrors
+
+	if ctx.Request.Header.Get("Content-Type") == "application/json" {
+		ctx.DecodeJSON(&data)
+	} else {
+		ctx.Request.ParseForm()
+
+		decoder := form.NewDecoder()
+		if err := decoder.Decode(&data, ctx.Request.Form); err != nil {
+			errors.As(err, &errs)
+		}
+	}
+
+	validate := validator.New(validator.WithRequiredStructEnabled())
+	if err := validate.Struct(data); err != nil {
+		errors.As(err, &errs)
+	}
+
+	return data, &errs, len(errs) == 0
+}
+
+// SetHeader sets a header in the response.
+func (ctx *CaesarCtx) SetHeader(key string, value string) {
+	ctx.ResponseWriter.Header().Set(key, value)
+}
+
+// GetHeader returns the value of a header in the request.
+func (ctx *CaesarCtx) GetHeader(key string) string {
+	return ctx.Request.Header.Get(key)
 }
