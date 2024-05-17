@@ -2,12 +2,11 @@ package core
 
 import (
 	"context"
+	"log/slog"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
-
-	"github.com/charmbracelet/log"
 
 	"go.uber.org/fx"
 )
@@ -64,11 +63,11 @@ func buildHTTPHandler(router *Router, route *Route, errorHandler *ErrorHandler) 
 		defer func() {
 			if err != nil {
 				// Defer the error handling
-				log.Error("Error handling request", "err", err, "duration", time.Since(timeStart))
+				slog.Error("Error handling request", "err", err, "duration", time.Since(timeStart))
 				errorHandler.Handle(ctx, err)
 			} else {
 				// Log the request completion
-				log.Info(
+				slog.Info(
 					"Request completed",
 					"method", r.Method,
 					"path", r.URL.Path,
@@ -93,7 +92,7 @@ func NewHTTPMux(router *Router, errorHandler *ErrorHandler) *http.ServeMux {
 	for _, route := range router.Routes {
 		var handler http.HandlerFunc
 
-		log.Info("Register route", "method", route.Method, "pattern", route.Pattern)
+		slog.Info("Register route", "method", route.Method, "pattern", route.Pattern)
 
 		handler = buildHTTPHandler(router, route, errorHandler)
 
@@ -121,27 +120,21 @@ func NewHTTPMux(router *Router, errorHandler *ErrorHandler) *http.ServeMux {
 }
 
 func NewHTTPServer(lc fx.Lifecycle, mux *http.ServeMux) *http.Server {
-	// Create the HTTP error logger
-	logger := log.NewWithOptions(os.Stderr, log.Options{Prefix: "http"})
-	stdlog := logger.StandardLog(log.StandardLogOptions{
-		ForceLevel: log.ErrorLevel,
-	})
-
 	// Create the server
 	srv := &http.Server{
-		Addr:     os.Getenv("ADDR"),
-		ErrorLog: stdlog,
-		Handler:  mux,
+		Addr:    os.Getenv("ADDR"),
+		Handler: mux,
 	}
 
 	// Register the server with the lifecycle
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
-			log.Info("HTTP server started", "addr", os.Getenv("ADDR"))
+			slog.Info("HTTP server started", "addr", os.Getenv("ADDR"))
 			go func() {
 				err := srv.ListenAndServe()
 				if err != nil {
-					log.Fatal("Error starting HTTP server", "err", err)
+					slog.Error("Error starting HTTP server", "err", err)
+					os.Exit(1)
 				}
 			}()
 			return nil
@@ -161,4 +154,18 @@ func (app *App) Run() {
 		fx.Invoke(func(*http.Server) {}),
 		fx.Invoke(app.Invokers...),
 	).Run()
+}
+
+func (app *App) RetrieveRouter() *Router {
+	var router *Router
+
+	fx.New(
+		fx.Provide(app.Providers...),
+		fx.Invoke(func(lc fx.Lifecycle, r *Router) {
+			router = r
+		}),
+		fx.NopLogger,
+	).Start(context.Background())
+
+	return router
 }

@@ -2,10 +2,11 @@ package core
 
 import (
 	"errors"
+	"log"
+	"log/slog"
 	"os"
 	"reflect"
 
-	"github.com/charmbracelet/log"
 	"github.com/go-playground/validator/v10"
 	_ "github.com/joho/godotenv/autoload"
 )
@@ -39,7 +40,7 @@ func ValidateEnvironmentVariables[T interface{}]() *T {
 		errors.As(err, &validationErrors)
 
 		for _, validationError := range validationErrors {
-			log.Error(
+			slog.Error(
 				"Invalid environment variable",
 				"field", validationError.Field(),
 				"value", validationError.Value(),
@@ -49,8 +50,6 @@ func ValidateEnvironmentVariables[T interface{}]() *T {
 
 		log.Fatal("Failed to validate environment variables")
 	}
-
-	log.Info("Environment variables validated")
 
 	return env
 }
