@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"os"
 	"reflect"
+	"strconv"
 
 	"github.com/go-playground/validator/v10"
 	_ "github.com/joho/godotenv/autoload"
@@ -29,7 +30,15 @@ func ValidateEnvironmentVariables[T interface{}]() *T {
 		}
 
 		if envValue := os.Getenv(envName); envValue != "" {
-			value.Field(i).SetString(envValue)
+			switch field.Type.Kind() {
+			case reflect.String:
+				value.Field(i).SetString(envValue)
+			case reflect.Bool:
+				boolValue, _ := strconv.ParseBool(envValue)
+				value.Field(i).SetBool(boolValue)
+			default:
+				log.Fatal("Unsupported type", "field", envName, "type", field.Type.Kind())
+			}
 		}
 	}
 
