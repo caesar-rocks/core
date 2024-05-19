@@ -31,6 +31,9 @@ func ValidateEnvironmentVariables[T interface{}]() *T {
 
 		if envValue := os.Getenv(envName); envValue != "" {
 			switch field.Type.Kind() {
+			case reflect.Int:
+				envValueInt, _ := strconv.Atoi(envValue)
+				value.Field(i).SetInt(int64(envValueInt))
 			case reflect.String:
 				value.Field(i).SetString(envValue)
 			case reflect.Bool:
