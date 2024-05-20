@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/a-h/templ"
@@ -80,7 +81,7 @@ func (ctx *CaesarCtx) Redirect(to string) error {
 
 // Validate validates the request body or form values.
 // It returns the data, the validation errors, and a boolean indicating if the data is valid.
-func Validate[T interface{}](ctx *CaesarCtx) (data *T, validationErrors *validator.ValidationErrors, ok bool) {
+func Validate[T interface{}](ctx *CaesarCtx) (data *T, validationErrors map[string]string, ok bool) {
 	data = new(T)
 	var errs validator.ValidationErrors
 
@@ -100,7 +101,13 @@ func Validate[T interface{}](ctx *CaesarCtx) (data *T, validationErrors *validat
 		errors.As(err, &errs)
 	}
 
-	return data, &errs, len(errs) == 0
+	// Turn `errs` into a map.
+	var errors = make(map[string]string)
+	for _, err := range errs {
+		errors[err.StructField()] = fmt.Sprintf("This field does not meet the following rule: \"%s\".", err.Tag())
+	}
+
+	return data, errors, len(errs) == 0
 }
 
 // SetHeader sets a header in the response.
