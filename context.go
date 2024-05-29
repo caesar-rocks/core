@@ -19,6 +19,7 @@ type CaesarCtx struct {
 	Request        *http.Request
 
 	statusCode int
+	nextCalled bool
 }
 
 func (c *CaesarCtx) Render(component templ.Component) error {
@@ -118,4 +119,9 @@ func (ctx *CaesarCtx) SetHeader(key string, value string) {
 // GetHeader returns the value of a header in the request.
 func (ctx *CaesarCtx) GetHeader(key string) string {
 	return ctx.Request.Header.Get(key)
+}
+
+// Next marks the middleware as having called the next handler in the chain.
+func (c *CaesarCtx) Next() {
+	c.nextCalled = true
 }

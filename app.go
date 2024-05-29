@@ -40,12 +40,13 @@ func buildHTTPHandler(router *Router, route *Route, errorHandler *ErrorHandler) 
 		var err error
 		timeStart := time.Now()
 
-		ctx := &CaesarCtx{ResponseWriter: w, Request: r, statusCode: http.StatusOK}
+		ctx := &CaesarCtx{ResponseWriter: w, Request: r, statusCode: http.StatusOK, nextCalled: true}
 
 		// Run the global middleware
 		for _, middleware := range router.Middleware {
-			err := middleware(ctx)
-			if err != nil {
+			ctx.nextCalled = false
+			err = middleware(ctx)
+			if err != nil || !ctx.nextCalled {
 				break
 			}
 		}
@@ -53,8 +54,9 @@ func buildHTTPHandler(router *Router, route *Route, errorHandler *ErrorHandler) 
 		// Run the route-related middleware, if no error occurred before
 		if err == nil {
 			for _, middleware := range route.Middleware {
+				ctx.nextCalled = false
 				err = middleware(ctx)
-				if err != nil {
+				if err != nil || !ctx.nextCalled {
 					break
 				}
 			}
@@ -80,7 +82,7 @@ func buildHTTPHandler(router *Router, route *Route, errorHandler *ErrorHandler) 
 
 		// Run the route handler, if no error occurred
 		// during the middleware execution
-		if err == nil {
+		if err == nil && ctx.nextCalled {
 			err = route.Handler(ctx)
 		}
 	}
