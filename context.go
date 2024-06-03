@@ -125,3 +125,8 @@ func (ctx *CaesarCtx) GetHeader(key string) string {
 func (c *CaesarCtx) Next() {
 	c.nextCalled = true
 }
+
+// WantsJSON returns true if the client accepts JSON responses.
+func (c *CaesarCtx) WantsJSON() bool {
+	return c.Request.Header.Get("Accept") == "application/json"
+}
