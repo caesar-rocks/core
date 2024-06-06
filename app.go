@@ -18,7 +18,8 @@ type App struct {
 }
 
 type AppConfig struct {
-	Addr string
+	Addr  string
+	Debug bool
 }
 
 func NewApp(cfg *AppConfig) *App {
@@ -161,12 +162,18 @@ func (app *App) Run() {
 func (app *App) RetrieveRouter() *Router {
 	var router *Router
 
-	fx.New(
+	fxOpts := []fx.Option{
 		fx.Provide(app.Providers...),
 		fx.Invoke(func(lc fx.Lifecycle, r *Router) {
 			router = r
 		}),
-		fx.NopLogger,
+	}
+	if !app.Config.Debug {
+		fxOpts = append(fxOpts, fx.NopLogger)
+	}
+
+	fx.New(
+		fxOpts...,
 	).Start(context.Background())
 
 	return router
