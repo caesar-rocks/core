@@ -80,6 +80,11 @@ func (ctx *CaesarCtx) Redirect(to string) error {
 	return nil
 }
 
+// RedirectBack redirects the client to the previous page.
+func (ctx *CaesarCtx) RedirectBack() error {
+	return ctx.Redirect(ctx.Request.Referer())
+}
+
 // Validate validates the request body or form values.
 // It returns the data, the validation errors, and a boolean indicating if the data is valid.
 func Validate[T interface{}](ctx *CaesarCtx) (data *T, validationErrors map[string]string, ok bool) {
