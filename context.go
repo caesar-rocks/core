@@ -135,3 +135,24 @@ func (c *CaesarCtx) Next() {
 func (c *CaesarCtx) WantsJSON() bool {
 	return c.Request.Header.Get("Accept") == "application/json"
 }
+
+// SetSSEHeaders sets the headers for Server-Sent Events
+func (ctx *CaesarCtx) SetSSEHeaders() {
+	ctx.SetHeader("Content-Type", "text/event-stream")
+	ctx.SetHeader("Cache-Control", "no-cache")
+	ctx.SetHeader("Connection", "keep-alive")
+	ctx.SetHeader("Access-Control-Allow-Origin", "*")
+	ctx.SetHeader("Access-Control-Allow-Headers", "Content-Type, Authorization")
+}
+
+// SendSSE sends a Server-Sent Event to the client
+func (ctx *CaesarCtx) SendSSE(name string, data string) error {
+	ctx.ResponseWriter.Write([]byte("event: " + name + "\n"))
+	ctx.ResponseWriter.Write([]byte("data: " + data + "\n\n"))
+	flusher, ok := ctx.ResponseWriter.(http.Flusher)
+	if !ok {
+		return errors.New("streaming unsupported")
+	}
+	flusher.Flush()
+	return nil
+}
