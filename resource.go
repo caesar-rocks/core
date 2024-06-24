@@ -4,55 +4,55 @@ package core
 // that handles CRUD operations.
 type ResourceController interface {
 	// Index returns a list of resources.
-	Index(ctx *CaesarCtx) error
+	Index(ctx *Context) error
 
 	// Create creates a new resource.
-	Create(ctx *CaesarCtx) error
+	Create(ctx *Context) error
 
 	// Store creates a new resource.
-	Store(ctx *CaesarCtx) error
+	Store(ctx *Context) error
 
 	// Show returns a single resource.
-	Show(ctx *CaesarCtx) error
+	Show(ctx *Context) error
 
 	// Edit returns a form to edit a resource.
-	Edit(ctx *CaesarCtx) error
+	Edit(ctx *Context) error
 
 	// Update updates a resource.
-	Update(ctx *CaesarCtx) error
+	Update(ctx *Context) error
 
 	// Delete deletes a resource.
-	Delete(ctx *CaesarCtx) error
+	Delete(ctx *Context) error
 }
 
 // BaseResourceController is a base controller for resources.
 type BaseResourceController struct{}
 
-func (c *BaseResourceController) Index(ctx *CaesarCtx) error {
+func (c *BaseResourceController) Index(ctx *Context) error {
 	return nil
 }
 
-func (c *BaseResourceController) Create(ctx *CaesarCtx) error {
+func (c *BaseResourceController) Create(ctx *Context) error {
 	return nil
 }
 
-func (c *BaseResourceController) Show(ctx *CaesarCtx) error {
+func (c *BaseResourceController) Show(ctx *Context) error {
 	return nil
 }
 
-func (c *BaseResourceController) Store(ctx *CaesarCtx) error {
+func (c *BaseResourceController) Store(ctx *Context) error {
 	return nil
 }
 
-func (c *BaseResourceController) Edit(ctx *CaesarCtx) error {
+func (c *BaseResourceController) Edit(ctx *Context) error {
 	return nil
 }
 
-func (c *BaseResourceController) Update(ctx *CaesarCtx) error {
+func (c *BaseResourceController) Update(ctx *Context) error {
 	return nil
 }
 
-func (c *BaseResourceController) Delete(ctx *CaesarCtx) error {
+func (c *BaseResourceController) Delete(ctx *Context) error {
 	return nil
 }
 

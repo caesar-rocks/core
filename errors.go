@@ -18,7 +18,7 @@ func NewError(code int) *Error {
 }
 
 type ErrorHandler struct {
-	Handle func(c *CaesarCtx, err error)
+	Handle func(c *Context, err error)
 }
 
 func RetrieveErrorCode(err error) int {

@@ -41,7 +41,7 @@ func buildHTTPHandler(router *Router, route *Route, errorHandler *ErrorHandler) 
 		var err error
 		timeStart := time.Now()
 
-		ctx := &CaesarCtx{ResponseWriter: w, Request: r, statusCode: http.StatusOK, nextCalled: true}
+		ctx := &Context{ResponseWriter: w, Request: r, statusCode: http.StatusOK, nextCalled: true, router: router}
 
 		// Run the global middleware
 		for _, middleware := range router.Middleware {
@@ -114,7 +114,7 @@ func NewHTTPMux(router *Router, errorHandler *ErrorHandler) *http.ServeMux {
 
 	// Map the home route to 404 if not already mapped
 	router.Mux.HandleFunc("/", buildHTTPHandler(router, &Route{
-		Handler: func(ctx *CaesarCtx) error {
+		Handler: func(ctx *Context) error {
 			return NewError(http.StatusNotFound)
 		},
 	}, errorHandler))

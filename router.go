@@ -2,26 +2,23 @@ package core
 
 import (
 	"embed"
+	"errors"
 	"net/http"
 
 	"github.com/a-h/templ"
 )
 
-type Handler func(*CaesarCtx) error
+// Handler is a function that can be used as middleware, or as a route handler.
+type Handler func(*Context) error
 
-type Route struct {
-	Method     string
-	Pattern    string
-	Handler    Handler
-	Middleware []Handler
-}
-
+// Router is a router that can be used to add routes.
 type Router struct {
 	Routes     []*Route
 	Mux        *http.ServeMux
 	Middleware []Handler
 }
 
+// NewRouter creates a new router.
 func NewRouter() *Router {
 	return &Router{
 		Routes: []*Route{},
@@ -72,15 +69,9 @@ func (r *Router) Delete(pattern string, handler Handler) *Route {
 
 // Render adds a route (with a GET method) that renders a component.
 func (r *Router) Render(pattern string, component templ.Component) *Route {
-	return r.Get(pattern, func(ctx *CaesarCtx) error {
+	return r.Get(pattern, func(ctx *Context) error {
 		return ctx.Render(component)
 	})
-}
-
-// Use adds middleware to the route.
-func (route *Route) Use(handler Handler) *Route {
-	route.Middleware = append(route.Middleware, handler)
-	return route
 }
 
 // Use adds middleware to the whole router (all routes).
@@ -98,4 +89,17 @@ func ServeStaticAssets(fs embed.FS) func(r *Router) {
 			http.StripPrefix("/", fileServer),
 		)
 	}
+}
+
+// MakeURL returns the URL for a route.
+func (r *Router) MakeURL(name string, values map[string]string) (string, error) {
+	for _, route := range r.Routes {
+		if route.Name == name {
+			url := route.MakeURL(values)
+			if url != "" {
+				return url, nil
+			}
+		}
+	}
+	return "", errors.New("route not found")
 }
