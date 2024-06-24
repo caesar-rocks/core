@@ -91,17 +91,19 @@ const (
 )
 
 // Exclude excludes methods from the resource.
-func (res *Resource) Exclude(methods ...ResourceControllerMethod) {
+func (res *Resource) Exclude(methods ...ResourceControllerMethod) *Resource {
 	for _, method := range methods {
 		delete(res.Routes, method)
 	}
+	return res
 }
 
 // Use adds middleware to the resource.
-func (res *Resource) Use(middleware ...Handler) {
+func (res *Resource) Use(middleware ...Handler) *Resource {
 	for _, route := range res.Routes {
 		for _, m := range middleware {
 			route.Use(m)
 		}
 	}
+	return res
 }
