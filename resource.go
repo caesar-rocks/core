@@ -67,12 +67,12 @@ func (r *Router) Resource(pattern string, controller ResourceController) *Resour
 		Routes: make(map[ResourceControllerMethod]*Route),
 	}
 
-	res.Routes[ResourceControllerMethodIndex] = r.Get(pattern+"/", controller.Index)
-	res.Routes[ResourceControllerMethodCreate] = r.Get(pattern+"/create", controller.Create)
-	res.Routes[ResourceControllerMethodShow] = r.Get(pattern+"/:id", controller.Show)
-	res.Routes[ResourceControllerMethodEdit] = r.Get(pattern+"/:id/edit", controller.Edit)
-	res.Routes[ResourceControllerMethodUpdate] = r.Put(pattern+"/:id", controller.Update)
-	res.Routes[ResourceControllerMethodDelete] = r.Delete(pattern+"/:id", controller.Delete)
+	res.Routes[MethodIndex] = r.Get(pattern+"/", controller.Index)
+	res.Routes[MethodCreate] = r.Get(pattern+"/create", controller.Create)
+	res.Routes[MethodShow] = r.Get(pattern+"/:id", controller.Show)
+	res.Routes[MethodEdit] = r.Get(pattern+"/:id/edit", controller.Edit)
+	res.Routes[MethodUpdate] = r.Put(pattern+"/:id", controller.Update)
+	res.Routes[MethodDelete] = r.Delete(pattern+"/:id", controller.Delete)
 
 	return res
 }
@@ -81,13 +81,13 @@ func (r *Router) Resource(pattern string, controller ResourceController) *Resour
 type ResourceControllerMethod string
 
 const (
-	ResourceControllerMethodIndex  ResourceControllerMethod = "Index"
-	ResourceControllerMethodCreate ResourceControllerMethod = "Create"
-	ResourceControllerMethodStore  ResourceControllerMethod = "Store"
-	ResourceControllerMethodShow   ResourceControllerMethod = "Show"
-	ResourceControllerMethodEdit   ResourceControllerMethod = "Edit"
-	ResourceControllerMethodUpdate ResourceControllerMethod = "Update"
-	ResourceControllerMethodDelete ResourceControllerMethod = "Delete"
+	MethodIndex  ResourceControllerMethod = "Index"
+	MethodCreate ResourceControllerMethod = "Create"
+	MethodStore  ResourceControllerMethod = "Store"
+	MethodShow   ResourceControllerMethod = "Show"
+	MethodEdit   ResourceControllerMethod = "Edit"
+	MethodUpdate ResourceControllerMethod = "Update"
+	MethodDelete ResourceControllerMethod = "Delete"
 )
 
 // Exclude excludes methods from the resource.
