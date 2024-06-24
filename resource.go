@@ -96,3 +96,12 @@ func (res *Resource) Exclude(methods ...ResourceControllerMethod) {
 		delete(res.Routes, method)
 	}
 }
+
+// Use adds middleware to the resource.
+func (res *Resource) Use(middleware ...Handler) {
+	for _, route := range res.Routes {
+		for _, m := range middleware {
+			route.Use(m)
+		}
+	}
+}
