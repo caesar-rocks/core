@@ -67,7 +67,7 @@ func (r *Router) Resource(pattern string, controller ResourceController) *Resour
 		Routes: make(map[ResourceControllerMethod]*Route),
 	}
 
-	res.Routes[MethodIndex] = r.Get(pattern+"/", controller.Index)
+	res.Routes[MethodIndex] = r.Get(pattern, controller.Index)
 	res.Routes[MethodCreate] = r.Get(pattern+"/create", controller.Create)
 	res.Routes[MethodShow] = r.Get(pattern+"/:id", controller.Show)
 	res.Routes[MethodEdit] = r.Get(pattern+"/:id/edit", controller.Edit)
