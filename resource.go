@@ -70,10 +70,10 @@ func (r *Router) Resource(pattern string, controller ResourceController) *Resour
 	res.Routes[MethodIndex] = r.Get(pattern, controller.Index)
 	res.Routes[MethodCreate] = r.Get(pattern+"/create", controller.Create)
 	res.Routes[MethodStore] = r.Post(pattern, controller.Store)
-	res.Routes[MethodShow] = r.Get(pattern+"/:id", controller.Show)
-	res.Routes[MethodEdit] = r.Get(pattern+"/:id/edit", controller.Edit)
-	res.Routes[MethodUpdate] = r.Put(pattern+"/:id", controller.Update)
-	res.Routes[MethodDelete] = r.Delete(pattern+"/:id", controller.Delete)
+	res.Routes[MethodShow] = r.Get(pattern+"/{id}", controller.Show)
+	res.Routes[MethodEdit] = r.Get(pattern+"/{id}/edit", controller.Edit)
+	res.Routes[MethodUpdate] = r.Put(pattern+"/{id}", controller.Update)
+	res.Routes[MethodDelete] = r.Delete(pattern+"/{id}", controller.Delete)
 
 	return res
 }
