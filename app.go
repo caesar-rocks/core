@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"go.uber.org/fx"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
 )
 
 type App struct {
@@ -92,6 +94,10 @@ func buildHTTPHandler(router *Router, route *Route, errorHandler *ErrorHandler) 
 func NewHTTPMux(router *Router, errorHandler *ErrorHandler) *http.ServeMux {
 	router.Mux = http.NewServeMux()
 
+	for _, handler := range router.CustomHandlers {
+		router.Mux.Handle(handler.Path, handler.Handler)
+	}
+
 	for _, route := range router.Routes {
 		var handler http.HandlerFunc
 
@@ -126,7 +132,7 @@ func NewHTTPServer(lc fx.Lifecycle, mux *http.ServeMux) *http.Server {
 	// Create the server
 	srv := &http.Server{
 		Addr:    os.Getenv("ADDR"),
-		Handler: mux,
+		Handler: h2c.NewHandler(mux, &http2.Server{}),
 	}
 
 	// Register the server with the lifecycle

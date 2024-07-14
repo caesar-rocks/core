@@ -11,11 +11,18 @@ import (
 // Handler is a function that can be used as middleware, or as a route handler.
 type Handler func(*Context) error
 
+// Adding in Handlers
+type ExtraHandler struct {
+	Path    string
+	Handler http.Handler
+}
+
 // Router is a router that can be used to add routes.
 type Router struct {
-	Routes     []*Route
-	Mux        *http.ServeMux
-	Middleware []Handler
+	Routes         []*Route
+	Mux            *http.ServeMux
+	Middleware     []Handler
+	CustomHandlers []ExtraHandler
 }
 
 // NewRouter creates a new router.
