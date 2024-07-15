@@ -13,16 +13,23 @@ type Handler func(*Context) error
 
 // Router is a router that can be used to add routes.
 type Router struct {
-	Routes     []*Route
-	Mux        *http.ServeMux
-	Middleware []Handler
+	Routes         []*Route
+	Mux            *http.ServeMux
+	Middleware     []Handler
+	StandardRoutes map[string]http.Handler
 }
 
 // NewRouter creates a new router.
 func NewRouter() *Router {
 	return &Router{
-		Routes: []*Route{},
+		Routes:         []*Route{},
+		StandardRoutes: map[string]http.Handler{},
 	}
+}
+
+// Handle adds a standard http.Handler to the router.
+func (r *Router) Handle(pattern string, handler http.Handler) {
+	r.StandardRoutes[pattern] = handler
 }
 
 // Any adds a route that matches any HTTP method.
@@ -84,7 +91,7 @@ func (r *Router) Use(handler Handler) {
 func ServeStaticAssets(fs embed.FS) func(r *Router) {
 	return func(r *Router) {
 		fileServer := http.FileServer(http.FS(fs))
-		r.Mux.Handle(
+		r.Handle(
 			"GET /assets/*",
 			http.StripPrefix("/", fileServer),
 		)
